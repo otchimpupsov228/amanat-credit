@@ -1,0 +1,42 @@
+version: "3.9"
+
+services:
+
+  db:
+    image: postgres:17
+    container_name: amanat_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: ${PG_USER:-amanat}
+      POSTGRES_PASSWORD: ${PG_PASSWORD:-amanat123}
+      POSTGRES_DB: submissions_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${PG_USER:-amanat}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build: .
+    container_name: amanat_backend
+    restart: always
+    ports:
+      - "8003:8003"
+    environment:
+      PG_USER: ${PG_USER:-amanat}
+      PG_HOST: db
+      PG_PORT: 5432
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./amanat_model.pkl:/app/amanat_model.pkl
+      - ./customer_decisions.xlsx:/app/customer_decisions.xlsx
+
+volumes:
+  postgres_data:

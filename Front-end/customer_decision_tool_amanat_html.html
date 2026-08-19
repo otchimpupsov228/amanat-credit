@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Amanat — Credit Decision</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --ink: #0f1117; --ink-soft: #6b7280; --border: #e5e7eb;
+    --bg: #f9fafb; --card: #ffffff; --green: #059669;
+    --green-bg: #ecfdf5; --red: #dc2626; --red-bg: #fef2f2;
+    --blue: #2563eb; --radius: 12px;
+  }
+  body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--ink); min-height: 100vh; display: flex; flex-direction: column; }
+  header { background: var(--card); border-bottom: 1px solid var(--border); padding: 0 40px; height: 60px; display: flex; align-items: center; justify-content: space-between; }
+  .logo { font-family: 'DM Serif Display', serif; font-size: 22px; letter-spacing: -0.3px; }
+  .logo span { color: var(--blue); }
+  .header-tag { font-size: 12px; color: var(--ink-soft); background: var(--bg); border: 1px solid var(--border); padding: 4px 10px; border-radius: 20px; }
+  main { flex: 1; max-width: 560px; width: 100%; margin: 48px auto; padding: 0 20px; }
+  .page-title { font-family: 'DM Serif Display', serif; font-size: 32px; line-height: 1.2; margin-bottom: 6px; }
+  .page-sub { color: var(--ink-soft); font-size: 14px; margin-bottom: 32px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 32px; }
+  .section-label { font-size: 10px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: var(--ink-soft); margin-bottom: 16px; }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+  label { font-size: 13px; font-weight: 500; color: var(--ink); }
+  input, select { height: 42px; border: 1px solid var(--border); border-radius: 8px; padding: 0 12px; font-size: 14px; font-family: 'Inter', sans-serif; color: var(--ink); background: var(--card); outline: none; transition: border-color 0.15s; width: 100%; }
+  input:focus, select:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(37,99,235,0.08); }
+  input::placeholder { color: #c4c9d4; }
+  .divider { height: 1px; background: var(--border); margin: 24px 0; }
+  button { width: 100%; height: 46px; background: var(--ink); color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; font-family: 'Inter', sans-serif; cursor: pointer; transition: opacity 0.15s; letter-spacing: 0.2px; }
+  button:hover { opacity: 0.85; }
+  button:disabled { opacity: 0.4; cursor: not-allowed; }
+  .result { margin-top: 20px; border-radius: var(--radius); padding: 24px; display: none; animation: fadeIn 0.3s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+  .result.approved { background: var(--green-bg); border: 1px solid #a7f3d0; display: block; }
+  .result.rejected { background: var(--red-bg); border: 1px solid #fecaca; display: block; }
+  .result-header { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+  .result-icon { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+  .approved .result-icon { background: #a7f3d0; }
+  .rejected .result-icon { background: #fecaca; }
+  .result-title { font-family: 'DM Serif Display', serif; font-size: 20px; }
+  .approved .result-title { color: var(--green); }
+  .rejected .result-title { color: var(--red); }
+  .result-reason { font-size: 13px; color: var(--ink-soft); margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid rgba(0,0,0,0.06); }
+  .result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .result-item label { font-size: 11px; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.5px; }
+  .result-item p { font-size: 14px; font-weight: 500; margin-top: 2px; }
+  .export-btn { margin-top: 32px; background: white; color: var(--ink); border: 1px solid var(--border); font-weight: 500; }
+  .export-btn:hover { background: var(--bg); opacity: 1; }
+  .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.6s linear infinite; margin-right: 8px; vertical-align: middle; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .toast { position: fixed; bottom: 24px; right: 24px; background: var(--ink); color: white; padding: 12px 18px; border-radius: 8px; font-size: 13px; font-weight: 500; opacity: 0; transform: translateY(8px); transition: all 0.25s; z-index: 999; }
+  .toast.show { opacity: 1; transform: translateY(0); }
+  footer { text-align: center; padding: 24px; font-size: 12px; color: var(--ink-soft); border-top: 1px solid var(--border); }
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">Amanat<span>.</span></div>
+  <span class="header-tag">Credit Decision Tool</span>
+</header>
+<main>
+  <h1 class="page-title">Customer Assessment</h1>
+  <p class="page-sub">Enter the customer's details to receive an instant credit decision.</p>
+  <div class="card">
+    <p class="section-label">Personal Information</p>
+    <div class="row">
+      <div class="field"><label>First Name</label><input type="text" id="name" placeholder="e.g. Huseyn"></div>
+      <div class="field"><label>Surname</label><input type="text" id="surname" placeholder="e.g. Majidov"></div>
+    </div>
+    <div class="field"><label>Date of Birth</label><input type="date" id="dob"></div>
+    <div class="field"><label>Residency</label><input type="text" id="residency" placeholder="e.g. Baku, Azerbaijan"></div>
+    <div class="divider"></div>
+    <p class="section-label">AKB Credit Score</p>
+    <div class="row">
+      <div class="field"><label>AKB Score</label><input type="number" id="akb_score" placeholder="e.g. 450"></div>
+      <div class="field">
+        <label>AKB Letter Grade</label>
+        <select id="akb_grade">
+          <option value="">— Select —</option>
+          <option value="A">A</option>
+          <option value="B">B</option>
+          <option value="C">C</option>
+          <option value="D">D</option>
+          <option value="E">E</option>
+          <option value="F">F</option>
+        </select>
+      </div>
+    </div>
+    <button id="submitBtn" onclick="submitCustomer()">Get Decision</button>
+    <div class="result" id="result"></div>
+  </div>
+  <button class="export-btn" onclick="exportAll()">⬇ Download Full Excel Report</button>
+</main>
+<footer>Amanat Credit Decision Tool — Internal Use Only</footer>
+<div class="toast" id="toast"></div>
+<script>
+  const API = "http://127.0.0.1:8002";
+  function formatDate(dob) { const [y,m,d] = dob.split("-"); return `${d}/${m}/${y}`; }
+  function showToast(msg) { const t = document.getElementById("toast"); t.textContent = msg; t.classList.add("show"); setTimeout(() => t.classList.remove("show"), 3000); }
+  async function submitCustomer() {
+    const name = document.getElementById("name").value.trim();
+    const surname = document.getElementById("surname").value.trim();
+    const dob = document.getElementById("dob").value;
+    const residency = document.getElementById("residency").value.trim();
+    const akb_score = document.getElementById("akb_score").value.trim();
+    const akb_grade = document.getElementById("akb_grade").value;
+    if (!name || !surname || !dob || !residency) { showToast("Please fill in all personal information fields."); return; }
+    const btn = document.getElementById("submitBtn");
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span>Processing...';
+    const payload = { name, surname, date_of_birth: formatDate(dob), residency, akb_score: akb_score === "" ? null : parseFloat(akb_score), akb_letter_grade: akb_grade || null };
+    try {
+      const res = await fetch(`${API}/submit-customer`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+      const data = await res.json();
+      showResult(data, payload);
+    } catch (e) { showToast("Could not connect to server. Is it running?"); }
+    finally { btn.disabled = false; btn.innerHTML = "Get Decision"; }
+  }
+  function showResult(data, payload) {
+    const isApproved = data.decision === "APPROVED";
+    const el = document.getElementById("result");
+    el.className = `result ${isApproved ? "approved" : "rejected"}`;
+    el.innerHTML = `
+      <div class="result-header">
+        <div class="result-icon">${isApproved ? "✓" : "✕"}</div>
+        <div class="result-title">${isApproved ? "Approved" : "Rejected"}</div>
+      </div>
+      <p class="result-reason">${data.decision}</p>
+      <div class="result-grid">
+        <div class="result-item"><label>Full Name</label><p>${payload.name} ${payload.surname}</p></div>
+        <div class="result-item"><label>Age</label><p>${data.age ?? "—"} years</p></div>
+        <div class="result-item"><label>AKB Score</label><p>${data.akb_score ?? "Not provided"}</p></div>
+        <div class="result-item"><label>AKB Grade</label><p>${data.akb_letter_grade ?? "—"}</p></div>
+        <div class="result-item"><label>Residency</label><p>${payload.residency}</p></div>
+        <div class="result-item"><label>Date of Birth</label><p>${payload.date_of_birth}</p></div>
+      </div>`;
+  }
+  async function exportAll() {
+    showToast("Generating Excel report...");
+    try {
+      const res = await fetch(`${API}/export-all`);
+      const data = await res.json();
+      showToast(`✅ Done! ${data.approved} approved, ${data.rejected} rejected. Check your files 2 folder.`);
+    } catch (e) { showToast("Could not connect to server."); }
+  }
+</script>
+</body>
+</html>

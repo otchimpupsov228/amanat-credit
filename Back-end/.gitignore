@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pkl
+.venv/
+venv/
+*.egg-info/
+
+# Environment
+.env
+
+# Data files
+*.xlsx
+customer_decisions.xlsx
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker
+postgres_data/
+
+# Logs
+*.log

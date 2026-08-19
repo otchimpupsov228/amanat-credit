@@ -1,0 +1,1502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Amanat — Credit</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:        #000000;
+  --surface:   #111111;
+  --surface2:  #1a1a1a;
+  --border:    #242424;
+  --border2:   #2e2e2e;
+  --ink:       #ffffff;
+  --ink-soft:  #888888;
+  --ink-muted: #555555;
+  --blue:      #2563eb;
+  --blue-dim:  rgba(37,99,235,0.12);
+  --blue-glow: rgba(37,99,235,0.3);
+  --green:     #10b981;
+  --green-dim: rgba(16,185,129,0.12);
+  --red:       #ef4444;
+  --red-dim:   rgba(239,68,68,0.12);
+  --amber:     #f59e0b;
+  --amber-dim: rgba(245,158,11,0.12);
+  --r:         16px;
+  --r-sm:      10px;
+}
+
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Header ─────────────────────────────────────────────── */
+header {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 60px;
+  background: rgba(0,0,0,0.85);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 28px;
+  z-index: 100;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.4px;
+}
+
+.logo-icon {
+  width: 32px;
+  height: 32px;
+  background: var(--blue);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+}
+
+.logo-icon svg {
+  width: 20px;
+  height: 20px;
+  fill: white;
+}
+
+.header-right { display: flex; align-items: center; gap: 10px; }
+
+.pill {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--ink-soft);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 5px 12px;
+  border-radius: 100px;
+}
+
+.admin-trigger {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-soft);
+  background: transparent;
+  border: 1px solid var(--border2);
+  padding: 6px 14px;
+  border-radius: 100px;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  transition: all 0.2s;
+  letter-spacing: 0.1px;
+}
+.admin-trigger:hover { color: var(--ink); border-color: var(--ink-soft); }
+
+/* ── Main layout ─────────────────────────────────────────── */
+main {
+  flex: 1;
+  padding-top: 60px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* ── Pages ───────────────────────────────────────────────── */
+.page { display: none; width: 100%; max-width: 480px; padding: 48px 20px 80px; }
+.page.active { display: block; }
+.page-wide { max-width: 1080px; }
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.page.active { animation: slideUp 0.35s cubic-bezier(.16,1,.3,1); }
+
+/* ── Welcome page ────────────────────────────────────────── */
+.welcome-eyebrow {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--blue);
+  margin-bottom: 16px;
+}
+
+.welcome-title {
+  font-size: 42px;
+  font-weight: 800;
+  letter-spacing: -1.5px;
+  line-height: 1.05;
+  margin-bottom: 16px;
+}
+
+.welcome-title span { color: var(--blue); }
+
+.welcome-sub {
+  font-size: 15px;
+  color: var(--ink-soft);
+  line-height: 1.6;
+  margin-bottom: 48px;
+  max-width: 360px;
+}
+
+.choose-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 32px;
+}
+
+.choose-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 24px 20px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(.16,1,.3,1);
+  position: relative;
+  overflow: hidden;
+}
+
+.choose-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--blue-dim);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.choose-card:hover { border-color: var(--blue); transform: translateY(-2px); }
+.choose-card:hover::before { opacity: 1; }
+
+.choose-card .card-icon {
+  width: 44px;
+  height: 44px;
+  background: var(--blue-dim);
+  border-radius: var(--r-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  margin-bottom: 16px;
+}
+
+.choose-card h3 {
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 6px;
+  letter-spacing: -0.2px;
+}
+
+.choose-card p {
+  font-size: 12px;
+  color: var(--ink-soft);
+  line-height: 1.5;
+}
+
+.trust-row {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
+}
+
+.trust-item {
+  font-size: 12px;
+  color: var(--ink-muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.trust-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--green);
+}
+
+/* ── Step indicator ──────────────────────────────────────── */
+.step-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 32px;
+}
+
+.step-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--border2);
+  transition: all 0.3s;
+}
+.step-dot.active { background: var(--blue); width: 24px; border-radius: 4px; }
+.step-dot.done { background: var(--green); }
+
+/* ── Page header ─────────────────────────────────────────── */
+.back-btn {
+  background: none;
+  border: none;
+  color: var(--ink-soft);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 28px;
+  padding: 0;
+  transition: color 0.15s;
+}
+.back-btn:hover { color: var(--ink); }
+
+.page-heading {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.8px;
+  margin-bottom: 4px;
+}
+
+.page-sub {
+  font-size: 13px;
+  color: var(--ink-soft);
+  margin-bottom: 28px;
+  line-height: 1.5;
+}
+
+/* ── Form card ───────────────────────────────────────────── */
+.form-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 24px;
+}
+
+.section-eyebrow {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  margin-bottom: 14px;
+}
+
+.row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.field:last-child { margin-bottom: 0; }
+
+.field label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink-soft);
+  letter-spacing: 0.1px;
+}
+
+.field input {
+  height: 46px;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: var(--r-sm);
+  padding: 0 14px;
+  font-size: 14px;
+  font-weight: 500;
+  font-family: 'Inter', sans-serif;
+  color: var(--ink);
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  width: 100%;
+}
+
+.field input:focus {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px var(--blue-dim);
+}
+
+.field input::placeholder { color: var(--ink-muted); font-weight: 400; }
+.field input[readonly] { color: var(--ink-soft); cursor: default; }
+
+input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.5); }
+
+.divider {
+  height: 1px;
+  background: var(--border);
+  margin: 20px 0;
+}
+
+/* ── Buttons ─────────────────────────────────────────────── */
+.btn-primary {
+  width: 100%;
+  height: 50px;
+  background: var(--blue);
+  color: white;
+  border: none;
+  border-radius: var(--r-sm);
+  font-size: 15px;
+  font-weight: 700;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  letter-spacing: -0.2px;
+  transition: all 0.2s;
+  margin-top: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-primary::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(255,255,255,0.1);
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 8px 24px var(--blue-glow); }
+.btn-primary:hover::after { opacity: 1; }
+.btn-primary:active { transform: translateY(0); }
+.btn-primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
+
+.btn-ghost {
+  width: 100%;
+  height: 46px;
+  background: transparent;
+  color: var(--ink-soft);
+  border: 1px solid var(--border2);
+  border-radius: var(--r-sm);
+  font-size: 14px;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-ghost:hover { border-color: var(--ink-soft); color: var(--ink); }
+
+/* Overdue toggle */
+.toggle-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 4px; }
+.toggle-opt {
+  height: 42px;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: var(--r-sm);
+  font-size: 13px;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.toggle-opt.selected-no  { border-color: var(--green); color: var(--green); background: var(--green-dim); }
+.toggle-opt.selected-yes { border-color: var(--red);   color: var(--red);   background: var(--red-dim); }
+
+/* ── Result card ─────────────────────────────────────────── */
+.result-card {
+  margin-top: 20px;
+  border-radius: var(--r);
+  padding: 24px;
+  display: none;
+  animation: slideUp 0.4s cubic-bezier(.16,1,.3,1);
+}
+
+.result-card.show { display: block; }
+
+.result-card.approved {
+  background: var(--green-dim);
+  border: 1px solid rgba(16,185,129,0.25);
+}
+
+.result-card.rejected {
+  background: var(--red-dim);
+  border: 1px solid rgba(239,68,68,0.25);
+}
+
+.result-card.warning {
+  background: var(--amber-dim);
+  border: 1px solid rgba(245,158,11,0.25);
+}
+
+.result-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.result-badge {
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.approved .result-badge { background: rgba(16,185,129,0.2); }
+.rejected .result-badge { background: rgba(239,68,68,0.2); }
+.warning  .result-badge { background: rgba(245,158,11,0.2); }
+
+.result-title-wrap {}
+.result-verdict {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  line-height: 1;
+}
+.approved .result-verdict { color: var(--green); }
+.rejected .result-verdict { color: var(--red); }
+.warning  .result-verdict { color: var(--amber); }
+
+.result-sub {
+  font-size: 12px;
+  color: var(--ink-soft);
+  margin-top: 3px;
+}
+
+.result-reason {
+  font-size: 13px;
+  color: var(--ink-soft);
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  line-height: 1.5;
+}
+
+.result-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.result-item .ri-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  margin-bottom: 3px;
+}
+
+.result-item .ri-val {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.2px;
+}
+
+/* ML badge */
+.ml-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 100px;
+  margin-left: 8px;
+  vertical-align: middle;
+  letter-spacing: 0.3px;
+}
+.ml-chip.ml    { background: rgba(37,99,235,0.2); color: #60a5fa; }
+.ml-chip.rules { background: var(--surface2); color: var(--ink-muted); }
+
+/* Score meter */
+.score-meter {
+  margin-bottom: 16px;
+  padding: 16px;
+  background: rgba(255,255,255,0.03);
+  border-radius: var(--r-sm);
+  border: 1px solid rgba(255,255,255,0.06);
+}
+
+.score-meter-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  margin-bottom: 10px;
+}
+
+.score-meter-bar {
+  height: 6px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 6px;
+}
+
+.score-meter-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.8s cubic-bezier(.16,1,.3,1);
+}
+
+.score-meter-fill.good { background: linear-gradient(90deg, #059669, #10b981); }
+.score-meter-fill.bad  { background: linear-gradient(90deg, #b91c1c, #ef4444); }
+
+.score-meter-val {
+  font-size: 24px;
+  font-weight: 900;
+  letter-spacing: -1px;
+}
+
+/* Reason codes */
+.reasons { margin-top: 14px; }
+.reasons-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  margin-bottom: 10px;
+}
+
+.reason-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 8px;
+  font-size: 13px;
+  color: var(--ink-soft);
+  line-height: 1.4;
+}
+
+.r-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  margin-top: 5px;
+  flex-shrink: 0;
+}
+.r-dot.green  { background: var(--green); }
+.r-dot.red    { background: var(--red); }
+.r-dot.yellow { background: var(--amber); }
+
+/* Loan offer */
+.loan-offer {
+  margin-top: 16px;
+  padding: 16px;
+  background: rgba(16,185,129,0.08);
+  border: 1px solid rgba(16,185,129,0.2);
+  border-radius: var(--r-sm);
+}
+
+.loan-offer-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--green);
+  margin-bottom: 12px;
+}
+
+.loan-offer-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.loan-offer-item .loi-label {
+  font-size: 11px;
+  color: var(--ink-muted);
+  margin-bottom: 2px;
+}
+
+.loan-offer-item .loi-val {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--green);
+  letter-spacing: -0.5px;
+}
+
+/* User ID box */
+.uid-box {
+  margin-top: 16px;
+  padding: 14px 16px;
+  background: var(--blue-dim);
+  border: 1px solid rgba(37,99,235,0.25);
+  border-radius: var(--r-sm);
+}
+
+.uid-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #60a5fa;
+  margin-bottom: 8px;
+}
+
+.uid-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.uid-row code {
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  font-size: 12px;
+  color: var(--ink);
+  flex: 1;
+  word-break: break-all;
+  line-height: 1.4;
+}
+
+.copy-btn {
+  flex-shrink: 0;
+  height: 30px;
+  padding: 0 12px;
+  background: var(--blue);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  transition: opacity 0.15s;
+}
+.copy-btn:hover { opacity: 0.85; }
+
+.arrow-btn {
+  width: 100%;
+  height: 50px;
+  background: var(--blue);
+  color: white;
+  border: none;
+  border-radius: var(--r-sm);
+  font-size: 14px;
+  font-weight: 700;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s;
+  letter-spacing: -0.2px;
+}
+.arrow-btn:hover { box-shadow: 0 8px 24px var(--blue-glow); transform: translateY(-1px); }
+
+/* Fraud box */
+.fraud-box {
+  margin-top: 12px;
+  padding: 12px 14px;
+  background: var(--red-dim);
+  border: 1px solid rgba(239,68,68,0.25);
+  border-radius: var(--r-sm);
+}
+.fraud-box strong { font-size: 12px; color: var(--red); display: block; margin-bottom: 4px; }
+.fraud-box p { font-size: 12px; color: #fca5a5; }
+
+/* Already exists */
+.exists-box {
+  margin-top: 16px;
+  padding: 14px 16px;
+  background: var(--amber-dim);
+  border: 1px solid rgba(245,158,11,0.25);
+  border-radius: var(--r-sm);
+}
+.exists-label { font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--amber); margin-bottom: 8px; }
+
+/* ── Admin overlay ────────────────────────────────────────── */
+.overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(8px);
+  z-index: 200;
+  align-items: center;
+  justify-content: center;
+}
+.overlay.show { display: flex; }
+
+.modal {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 20px;
+  padding: 36px;
+  width: 380px;
+  max-width: 90vw;
+  animation: slideUp 0.3s cubic-bezier(.16,1,.3,1);
+}
+
+.modal h2 {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  margin-bottom: 6px;
+}
+
+.modal p { font-size: 13px; color: var(--ink-soft); margin-bottom: 24px; }
+
+.modal-actions { display: flex; gap: 10px; margin-top: 20px; }
+.modal-actions .btn-ghost { flex: 1; }
+.modal-actions .btn-primary { flex: 2; margin-top: 0; }
+
+.modal-error {
+  font-size: 12px;
+  color: var(--red);
+  margin-top: 8px;
+  display: none;
+}
+
+/* ── Admin dashboard ──────────────────────────────────────── */
+.admin-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.admin-heading {
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.8px;
+}
+
+.admin-tabs {
+  display: flex;
+  gap: 4px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 100px;
+  padding: 4px;
+  margin-bottom: 28px;
+  width: fit-content;
+}
+
+.a-tab {
+  padding: 7px 18px;
+  border: none;
+  border-radius: 100px;
+  background: transparent;
+  color: var(--ink-muted);
+  font-size: 13px;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.a-tab.active { background: var(--blue); color: white; }
+
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.stat-tile {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 18px;
+}
+
+.st-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  margin-bottom: 8px;
+}
+
+.st-val {
+  font-size: 26px;
+  font-weight: 900;
+  letter-spacing: -1px;
+}
+.st-val.blue  { color: var(--blue); }
+.st-val.green { color: var(--green); }
+.st-val.red   { color: var(--red); }
+
+.charts-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.chart-tile {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 20px;
+}
+
+.chart-tile h3 {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  margin-bottom: 16px;
+}
+
+/* Table */
+.table-wrap {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  overflow: hidden;
+}
+
+.table-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.table-top h3 { font-size: 14px; font-weight: 700; }
+
+.refresh-btn {
+  height: 34px;
+  padding: 0 14px;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 8px;
+  color: var(--ink-soft);
+  font-size: 12px;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.refresh-btn:hover { color: var(--ink); border-color: var(--ink-soft); }
+
+table { width: 100%; border-collapse: collapse; }
+th {
+  padding: 10px 16px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  background: rgba(255,255,255,0.02);
+}
+td {
+  padding: 13px 16px;
+  font-size: 13px;
+  border-bottom: 1px solid var(--border);
+  color: var(--ink-soft);
+}
+td strong { color: var(--ink); font-weight: 600; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: rgba(255,255,255,0.02); }
+
+.chip {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 100px;
+  letter-spacing: 0.3px;
+}
+.chip.ok  { background: rgba(16,185,129,0.15); color: var(--green); }
+.chip.no  { background: rgba(239,68,68,0.15);  color: var(--red); }
+.chip.ml  { background: rgba(37,99,235,0.15);  color: #60a5fa; }
+.chip.rul { background: var(--surface2); color: var(--ink-muted); }
+.chip.frk { background: rgba(239,68,68,0.15); color: var(--red); }
+
+/* ── Spinner ──────────────────────────────────────────────── */
+.spin {
+  display: inline-block;
+  width: 14px; height: 14px;
+  border: 2px solid rgba(255,255,255,0.2);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: rotate 0.6s linear infinite;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+@keyframes rotate { to { transform: rotate(360deg); } }
+
+/* ── Toast ───────────────────────────────────────────────── */
+.toast {
+  position: fixed;
+  bottom: 28px; left: 50%;
+  transform: translateX(-50%) translateY(12px);
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  color: var(--ink);
+  padding: 12px 20px;
+  border-radius: 100px;
+  font-size: 13px;
+  font-weight: 500;
+  opacity: 0;
+  transition: all 0.25s cubic-bezier(.16,1,.3,1);
+  z-index: 999;
+  white-space: nowrap;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ── Confetti ─────────────────────────────────────────────── */
+.confetti-wrap {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 500;
+}
+
+.confetti-piece {
+  position: absolute;
+  top: -10px;
+  width: 8px; height: 8px;
+  border-radius: 2px;
+  animation: confettiFall 3s ease-in forwards;
+}
+
+@keyframes confettiFall {
+  0%   { transform: translateY(0) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+}
+
+/* ── Footer ──────────────────────────────────────────────── */
+footer {
+  text-align: center;
+  padding: 24px;
+  font-size: 11px;
+  color: var(--ink-muted);
+  border-top: 1px solid var(--border);
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z"/>
+      </svg>
+    </div>
+    Amanat
+  </div>
+  <div class="header-right">
+    <span class="pill">Credit Decision</span>
+    <button class="admin-trigger" onclick="openAdmin()">🔐 Admin</button>
+  </div>
+</header>
+
+<!-- Admin Login Modal -->
+<div class="overlay" id="adminOverlay">
+  <div class="modal">
+    <h2>Admin access</h2>
+    <p>Enter your credentials to view the dashboard.</p>
+    <div class="field"><label>Username</label><input type="text" id="adminUser" placeholder="Username" style="background:var(--surface2)"></div>
+    <div class="field"><label>Password</label><input type="password" id="adminPass" placeholder="Password" style="background:var(--surface2)" onkeydown="if(event.key==='Enter')loginAdmin()"></div>
+    <div class="modal-error" id="adminError">Incorrect credentials. Try again.</div>
+    <div class="modal-actions">
+      <button class="btn-ghost" onclick="closeAdmin()">Cancel</button>
+      <button class="btn-primary" onclick="loginAdmin()">Login</button>
+    </div>
+  </div>
+</div>
+
+<main>
+
+  <!-- PAGE 1: Welcome -->
+  <div class="page active" id="page1">
+    <div class="welcome-eyebrow">Amanat.az · Credit Decision</div>
+    <h1 class="welcome-title">Know your<br><span>credit standing</span><br>instantly.</h1>
+    <p class="welcome-sub">Powered by XGBoost and real credit bureau data. Get a decision in seconds.</p>
+
+    <div class="choose-grid">
+      <div class="choose-card" onclick="goTo('pageNew')">
+        <div class="card-icon">👤</div>
+        <h3>New Customer</h3>
+        <p>First time here. Get assessed and receive your unique credit ID.</p>
+      </div>
+      <div class="choose-card" onclick="goTo('pageExisting')">
+        <div class="card-icon">🔄</div>
+        <h3>Returning</h3>
+        <p>Have a User ID? Enter it for your full ML credit assessment.</p>
+      </div>
+    </div>
+
+    <div class="trust-row">
+      <div class="trust-item"><div class="trust-dot"></div>AKB Bureau Connected</div>
+      <div class="trust-item"><div class="trust-dot"></div>ML Powered</div>
+      <div class="trust-item"><div class="trust-dot"></div>Instant Decision</div>
+    </div>
+  </div>
+
+  <!-- PAGE 2a: New — Step 1 -->
+  <div class="page" id="pageNew">
+    <button class="back-btn" onclick="goTo('page1')">← Back</button>
+    <div class="step-indicator">
+      <div class="step-dot active" id="s1"></div>
+      <div class="step-dot" id="s2"></div>
+    </div>
+    <h1 class="page-heading">Personal details</h1>
+    <p class="page-sub">Step 1 of 2 — We'll check the basics first.</p>
+
+    <div class="form-card">
+      <div class="section-eyebrow">Identity</div>
+      <div class="row">
+        <div class="field"><label>First name</label><input type="text" id="name" placeholder="Huseyn"></div>
+        <div class="field"><label>Surname</label><input type="text" id="surname" placeholder="Majidov"></div>
+      </div>
+      <div class="field"><label>Date of birth</label><input type="date" id="dob"></div>
+      <div class="field"><label>City of residence</label><input type="text" id="residency" placeholder="Baku, Azerbaijan"></div>
+      <div class="divider"></div>
+      <div class="section-eyebrow">AKB Credit Score</div>
+      <div class="row">
+        <div class="field"><label>AKB Score</label><input type="number" id="akb_score" placeholder="450" oninput="calcGrade('akb_score','akb_grade')"></div>
+        <div class="field"><label>Grade (auto)</label><input type="text" id="akb_grade" placeholder="—" readonly></div>
+      </div>
+      <button class="btn-primary" id="btnStep1" onclick="submitStep1()">Continue →</button>
+    </div>
+    <div class="result-card" id="resultStep1"></div>
+  </div>
+
+  <!-- PAGE 2a-2: New — Step 2 -->
+  <div class="page" id="pageNewStep2">
+    <button class="back-btn" onclick="goTo('pageNew')">← Back</button>
+    <div class="step-indicator">
+      <div class="step-dot done"></div>
+      <div class="step-dot active"></div>
+    </div>
+    <h1 class="page-heading">Financial profile</h1>
+    <p class="page-sub">Step 2 of 2 — This lets our ML model assess your risk accurately.</p>
+
+    <div class="form-card">
+      <div class="section-eyebrow">Income & Expenses</div>
+      <div class="row">
+        <div class="field"><label>Monthly income (AZN)</label><input type="number" id="monthly_income" placeholder="1500"></div>
+        <div class="field"><label>Monthly expenses (AZN)</label><input type="number" id="monthly_expenses" placeholder="800"></div>
+      </div>
+      <div class="divider"></div>
+      <div class="section-eyebrow">Existing Debt</div>
+      <div class="field"><label>Total outstanding debt (AZN)</label><input type="number" id="outstanding_debt" placeholder="0"></div>
+      <div class="field">
+        <label>Any overdue payments?</label>
+        <div class="toggle-row">
+          <button class="toggle-opt" id="btnNo" onclick="setOverdue(false)">No</button>
+          <button class="toggle-opt" id="btnYes" onclick="setOverdue(true)">Yes</button>
+        </div>
+      </div>
+      <div class="field" id="overdueField" style="display:none">
+        <label>Total overdue amount (AZN)</label>
+        <input type="number" id="overdue_amount" placeholder="500">
+      </div>
+      <button class="btn-primary" id="btnStep2" onclick="submitStep2()">Get ML Decision</button>
+    </div>
+    <div class="result-card" id="resultNew"></div>
+  </div>
+
+  <!-- PAGE 2b: Existing Customer -->
+  <div class="page" id="pageExisting">
+    <button class="back-btn" onclick="goTo('page1')">← Back</button>
+    <h1 class="page-heading">Returning customer</h1>
+    <p class="page-sub">Enter your User ID and AKB score for a full ML assessment.</p>
+
+    <div class="form-card">
+      <div class="section-eyebrow">Your ID</div>
+      <div class="field"><label>User ID</label><input type="text" id="existing_user_id" placeholder="019af7df-992b-7974-b654-d83ca32dd8e9"></div>
+      <div class="field"><label>Date of birth (if new ID)</label><input type="date" id="existing_dob"></div>
+      <div class="divider"></div>
+      <div class="section-eyebrow">AKB Credit Score</div>
+      <div class="row">
+        <div class="field"><label>AKB Score</label><input type="number" id="existing_akb_score" placeholder="450" oninput="calcGrade('existing_akb_score','existing_akb_grade')"></div>
+        <div class="field"><label>Grade (auto)</label><input type="text" id="existing_akb_grade" placeholder="—" readonly></div>
+      </div>
+      <button class="btn-primary" id="btnExisting" onclick="submitExisting()">Get Decision</button>
+    </div>
+    <div class="result-card" id="resultExisting"></div>
+  </div>
+
+  <!-- PAGE 3: Admin -->
+  <div class="page page-wide" id="pageAdmin">
+    <div class="admin-topbar">
+      <div>
+        <div class="welcome-eyebrow" style="margin-bottom:4px">Admin Panel</div>
+        <div class="admin-heading">Dashboard</div>
+      </div>
+      <button class="btn-ghost" style="width:auto;padding:0 20px;height:38px" onclick="logoutAdmin()">Logout</button>
+    </div>
+
+    <div class="admin-tabs">
+      <button class="a-tab active" onclick="switchTab('overview',this)">Overview</button>
+      <button class="a-tab" onclick="switchTab('submissions',this)">Submissions</button>
+      <button class="a-tab" onclick="switchTab('heatmap',this)">Risk Heatmap</button>
+    </div>
+
+    <!-- Overview -->
+    <div id="tabOverview">
+      <div class="stats-row">
+        <div class="stat-tile"><div class="st-label">Total</div><div class="st-val blue" id="stTotal">—</div></div>
+        <div class="stat-tile"><div class="st-label">Approved</div><div class="st-val green" id="stApproved">—</div></div>
+        <div class="stat-tile"><div class="st-label">Rejected</div><div class="st-val red" id="stRejected">—</div></div>
+        <div class="stat-tile"><div class="st-label">Avg AKB</div><div class="st-val blue" id="stAvgAkb">—</div></div>
+        <div class="stat-tile"><div class="st-label">Avg Age</div><div class="st-val blue" id="stAvgAge">—</div></div>
+      </div>
+      <div class="charts-grid">
+        <div class="chart-tile"><h3>Daily Submissions — 14 days</h3><canvas id="chartDaily"></canvas></div>
+        <div class="chart-tile"><h3>AKB Grade Distribution</h3><canvas id="chartAkb"></canvas></div>
+      </div>
+      <div class="chart-tile" style="margin-bottom:24px"><h3>Rejection Reasons</h3><canvas id="chartReasons" height="100"></canvas></div>
+    </div>
+
+    <!-- Submissions -->
+    <div id="tabSubmissions" style="display:none">
+      <div class="table-wrap">
+        <div class="table-top">
+          <h3>All Submissions</h3>
+          <button class="refresh-btn" onclick="loadSubmissions()">↻ Refresh</button>
+        </div>
+        <div style="overflow-x:auto">
+          <table>
+            <thead><tr><th>Name</th><th>DOB</th><th>Age</th><th>AKB</th><th>Decision</th><th>Method</th><th>Flags</th><th>User ID</th><th>Time</th></tr></thead>
+            <tbody id="adminTbody"><tr><td colspan="9" style="text-align:center;padding:40px;color:var(--ink-muted)">Click Refresh to load</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Heatmap -->
+    <div id="tabHeatmap" style="display:none">
+      <div class="chart-tile">
+        <h3>Risk Heatmap — AKB Score vs Age</h3>
+        <canvas id="chartHeatmap" height="350"></canvas>
+        <p style="font-size:11px;color:var(--ink-muted);margin-top:12px">🟢 Approved &nbsp; 🔴 Rejected &nbsp; Each point = one submission</p>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<div class="confetti-wrap" id="confettiWrap"></div>
+<footer>Amanat.az · Credit Decision System · Internal Use Only</footer>
+<div class="toast" id="toast"></div>
+
+<script>
+const API = "http://127.0.0.1:8003";
+const ADMIN_U = "AdminAMNT";
+const ADMIN_P = "amanat_admin_panel";
+let isAdmin = false;
+let step1Data = {};
+let hasOverdue = false;
+let charts = {};
+
+// ── Navigation ──────────────────────────────────────────────
+function goTo(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function switchTab(tab, btn) {
+  document.querySelectorAll('.a-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tabOverview').style.display    = tab==='overview'     ? 'block' : 'none';
+  document.getElementById('tabSubmissions').style.display = tab==='submissions'  ? 'block' : 'none';
+  document.getElementById('tabHeatmap').style.display     = tab==='heatmap'      ? 'block' : 'none';
+  if (tab==='heatmap')     loadHeatmap();
+  if (tab==='submissions') loadSubmissions();
+}
+
+// ── Admin ───────────────────────────────────────────────────
+function openAdmin()  { if(isAdmin){goTo('pageAdmin');return;} document.getElementById('adminOverlay').classList.add('show'); setTimeout(()=>document.getElementById('adminUser').focus(),100); }
+function closeAdmin() { document.getElementById('adminOverlay').classList.remove('show'); document.getElementById('adminError').style.display='none'; }
+function loginAdmin() {
+  if (document.getElementById('adminUser').value===ADMIN_U && document.getElementById('adminPass').value===ADMIN_P) {
+    isAdmin=true; closeAdmin(); goTo('pageAdmin'); loadAnalytics();
+  } else { document.getElementById('adminError').style.display='block'; }
+}
+function logoutAdmin() { isAdmin=false; goTo('page1'); }
+
+// ── Utilities ───────────────────────────────────────────────
+function grade(s) {
+  if (isNaN(s)||s==='') return '';
+  if (s<=199) return 'E'; if (s<=599) return 'D';
+  if (s<=746) return 'C'; if (s<=824) return 'B'; return 'A';
+}
+function calcGrade(inp,out) { document.getElementById(out).value=grade(parseFloat(document.getElementById(inp).value)); }
+function fmt(d)  { const[y,m,dd]=d.split('-'); return `${dd}/${m}/${y}`; }
+function toast(m){ const t=document.getElementById('toast'); t.textContent=m; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),3000); }
+function copyId(id){ navigator.clipboard.writeText(id).then(()=>toast('User ID copied!')); }
+
+function setOverdue(v) {
+  hasOverdue=v;
+  document.getElementById('btnNo').className  = 'toggle-opt'+(v?'':' selected-no');
+  document.getElementById('btnYes').className = 'toggle-opt'+(v?' selected-yes':'');
+  document.getElementById('overdueField').style.display=v?'block':'none';
+}
+
+// ── Confetti ─────────────────────────────────────────────────
+function confetti() {
+  const wrap=document.getElementById('confettiWrap');
+  wrap.innerHTML='';
+  const colors=['#2563eb','#10b981','#f59e0b','#8b5cf6','#ffffff'];
+  for(let i=0;i<60;i++){
+    const el=document.createElement('div');
+    el.className='confetti-piece';
+    el.style.cssText=`left:${Math.random()*100}%;background:${colors[i%colors.length]};animation-delay:${Math.random()*1}s;animation-duration:${2+Math.random()*2}s;border-radius:${Math.random()>0.5?'50%':'2px'}`;
+    wrap.appendChild(el);
+  }
+  setTimeout(()=>wrap.innerHTML='',4000);
+}
+
+// ── Build result pieces ─────────────────────────────────────
+function buildScore(data) {
+  if (data.ml_score==null) return '';
+  const ok=data.decision==='APPROVED';
+  return `<div class="score-meter">
+    <div class="score-meter-label">ML Credit Score</div>
+    <div class="score-meter-bar"><div class="score-meter-fill ${ok?'good':'bad'}" style="width:${data.ml_score}%"></div></div>
+    <div class="score-meter-val" style="color:${ok?'var(--green)':'var(--red)'}">${data.ml_score}<span style="font-size:14px;font-weight:500;color:var(--ink-muted)">%</span></div>
+  </div>`;
+}
+
+function buildReasons(data) {
+  if (!data.reasons||!data.reasons.length) return '';
+  return `<div class="reasons"><div class="reasons-label">Why this decision</div>${data.reasons.map(r=>`<div class="reason-row"><div class="r-dot ${r.type}"></div><span>${r.text}</span></div>`).join('')}</div>`;
+}
+
+function buildLoan(data) {
+  if (!data.loan_recommendation) return '';
+  const l=data.loan_recommendation;
+  return `<div class="loan-offer"><div class="loan-offer-label">💰 Recommended Offer</div>
+    <div class="loan-offer-grid">
+      <div class="loan-offer-item"><div class="loi-label">Max amount</div><div class="loi-val">${l.max_amount.toLocaleString()} AZN</div></div>
+      <div class="loan-offer-item"><div class="loi-label">Interest rate</div><div class="loi-val">${l.interest_rate}%/yr</div></div>
+      <div class="loan-offer-item"><div class="loi-label">Term</div><div class="loi-val">${l.term_months} mo</div></div>
+      <div class="loan-offer-item"><div class="loi-label">Monthly payment</div><div class="loi-val">~${l.monthly_payment} AZN</div></div>
+    </div></div>`;
+}
+
+function buildFraud(data) {
+  if (!data.fraud_flags||!data.fraud_flags.length) return '';
+  return `<div class="fraud-box"><strong>🚨 Fraud Flags</strong>${data.fraud_flags.map(f=>`<p>• ${f}</p>`).join('')}</div>`;
+}
+
+function buildUID(uid) {
+  if (!uid) return '';
+  return `<div class="uid-box"><div class="uid-label">Your User ID — save this</div>
+    <div class="uid-row"><code>${uid}</code><button class="copy-btn" onclick="copyId('${uid}')">Copy</button></div></div>
+    <button class="arrow-btn" onclick="goToExisting('${uid}')">Get full ML assessment →</button>`;
+}
+
+// ── Step 1 ───────────────────────────────────────────────────
+async function submitStep1() {
+  const name=document.getElementById('name').value.trim();
+  const surname=document.getElementById('surname').value.trim();
+  const dob=document.getElementById('dob').value;
+  const residency=document.getElementById('residency').value.trim();
+  const akb_score=document.getElementById('akb_score').value.trim();
+  const akb_grade=document.getElementById('akb_grade').value;
+  if (!name||!surname||!dob||!residency) { toast('Fill in all personal information fields.'); return; }
+
+  const btn=document.getElementById('btnStep1');
+  btn.disabled=true; btn.innerHTML='<span class="spin"></span>Checking...';
+
+  try {
+    const res=await fetch(`${API}/submit-customer`,{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({customer_type:'new',step:1,name,surname,date_of_birth:fmt(dob),residency,akb_score:akb_score===''?null:parseFloat(akb_score),akb_letter_grade:akb_grade||null})});
+    const data=await res.json();
+
+    if (data.already_exists) {
+      const el=document.getElementById('resultStep1');
+      el.className='result-card warning show';
+      el.innerHTML=`<div class="result-header"><div class="result-badge">⚠️</div><div class="result-title-wrap"><div class="result-verdict">Account exists</div><div class="result-sub">You already have a credit profile</div></div></div>
+        <div class="result-reason">Your name and date of birth match an existing account.</div>
+        <div class="exists-box"><div class="exists-label">Your User ID</div>
+          <div class="uid-row"><code>${data.existing_user_id}</code><button class="copy-btn" style="background:var(--amber)" onclick="copyId('${data.existing_user_id}')">Copy</button></div></div>
+        <button class="arrow-btn" style="background:var(--amber);margin-top:12px" onclick="goToExisting('${data.existing_user_id}')">Go to your account →</button>`;
+      return;
+    }
+
+    if (data.hard_rejected) {
+      const el=document.getElementById('resultStep1');
+      el.className='result-card rejected show';
+      el.innerHTML=`<div class="result-header"><div class="result-badge">✕</div><div class="result-title-wrap"><div class="result-verdict">Rejected</div><div class="result-sub">Hard rule · Not eligible</div></div></div>
+        <div class="result-reason">${data.decision}</div>${buildReasons(data)}`;
+      return;
+    }
+
+    step1Data={name,surname,date_of_birth:fmt(dob),residency,akb_score:akb_score===''?null:parseFloat(akb_score),akb_letter_grade:akb_grade||null,generated_user_id:data.generated_user_id};
+    document.getElementById('resultStep1').className='result-card';
+    goTo('pageNewStep2');
+
+  } catch(e) { toast('Could not connect to server. Is it running?'); }
+  finally { btn.disabled=false; btn.innerHTML='Continue →'; }
+}
+
+// ── Step 2 ───────────────────────────────────────────────────
+async function submitStep2() {
+  const monthly_income=parseFloat(document.getElementById('monthly_income').value)||0;
+  const monthly_expenses=parseFloat(document.getElementById('monthly_expenses').value)||0;
+  const outstanding_debt=parseFloat(document.getElementById('outstanding_debt').value)||0;
+  const overdue_amount=hasOverdue?(parseFloat(document.getElementById('overdue_amount').value)||0):0;
+
+  const btn=document.getElementById('btnStep2');
+  btn.disabled=true; btn.innerHTML='<span class="spin"></span>Running ML model...';
+
+  try {
+    const res=await fetch(`${API}/submit-customer`,{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({...step1Data,customer_type:'new',step:2,monthly_income,monthly_expenses,outstanding_debt,overdue_amount,has_overdue:hasOverdue})});
+    const data=await res.json();
+    showResult(data,'resultNew',step1Data);
+    if (data.decision==='APPROVED') confetti();
+  } catch(e) { toast('Could not connect to server. Is it running?'); }
+  finally { btn.disabled=false; btn.innerHTML='Get ML Decision'; }
+}
+
+// ── Existing ─────────────────────────────────────────────────
+function goToExisting(uid) { document.getElementById('existing_user_id').value=uid; goTo('pageExisting'); }
+
+async function submitExisting() {
+  const user_id=document.getElementById('existing_user_id').value.trim();
+  const dob=document.getElementById('existing_dob').value;
+  const akb_score=document.getElementById('existing_akb_score').value.trim();
+  const akb_grade=document.getElementById('existing_akb_grade').value;
+  if (!user_id) { toast('Enter your User ID.'); return; }
+
+  const btn=document.getElementById('btnExisting');
+  btn.disabled=true; btn.innerHTML='<span class="spin"></span>Processing...';
+
+  try {
+    const res=await fetch(`${API}/submit-customer`,{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({customer_type:'existing',user_id,date_of_birth:dob?fmt(dob):null,akb_score:akb_score===''?null:parseFloat(akb_score),akb_letter_grade:akb_grade||null})});
+    const data=await res.json();
+    showResult(data,'resultExisting',{});
+    if (data.decision==='APPROVED') confetti();
+  } catch(e) { toast('Could not connect to server. Is it running?'); }
+  finally { btn.disabled=false; btn.innerHTML='Get Decision'; }
+}
+
+// ── Show result ───────────────────────────────────────────────
+function showResult(data, elId, payload) {
+  const isOk=data.decision==='APPROVED';
+  const isML=data.decision_type==='XGBoost ML Model';
+  const el=document.getElementById(elId);
+  const uid=data.generated_user_id;
+
+  el.className=`result-card ${isOk?'approved':'rejected'} show`;
+  el.innerHTML=`
+    <div class="result-header">
+      <div class="result-badge">${isOk?'✓':'✕'}</div>
+      <div class="result-title-wrap">
+        <div class="result-verdict">${isOk?'Approved':'Rejected'}<span class="ml-chip ${isML?'ml':'rules'}">${isML?'🤖 ML':'📋 Rules'}</span></div>
+        <div class="result-sub">${data.decision_type}</div>
+      </div>
+    </div>
+    <div class="result-reason">${data.decision}</div>
+    <div class="result-grid">
+      ${payload.name?`<div class="result-item"><div class="ri-label">Name</div><div class="ri-val">${payload.name} ${payload.surname||''}</div></div>`:''}
+      <div class="result-item"><div class="ri-label">Age</div><div class="ri-val">${data.age??'—'}</div></div>
+      <div class="result-item"><div class="ri-label">AKB Score</div><div class="ri-val">${data.akb_score??'—'}</div></div>
+      <div class="result-item"><div class="ri-label">AKB Grade</div><div class="ri-val">${data.akb_letter_grade??'—'}</div></div>
+    </div>
+    ${buildScore(data)}
+    ${buildReasons(data)}
+    ${buildLoan(data)}
+    ${buildFraud(data)}
+    ${uid?buildUID(uid):''}`;
+}
+
+// ── Admin analytics ───────────────────────────────────────────
+async function loadAnalytics() {
+  try {
+    const res=await fetch(`${API}/admin/analytics`);
+    const d=await res.json();
+    const s=d.stats;
+    document.getElementById('stTotal').textContent=s.total||0;
+    document.getElementById('stApproved').textContent=s.approved||0;
+    document.getElementById('stRejected').textContent=s.rejected||0;
+    document.getElementById('stAvgAkb').textContent=s.avg_akb||'—';
+    document.getElementById('stAvgAge').textContent=s.avg_age||'—';
+
+    Chart.defaults.color='#555';
+    Chart.defaults.borderColor='#222';
+
+    if(charts.daily) charts.daily.destroy();
+    charts.daily=new Chart(document.getElementById('chartDaily'),{type:'bar',
+      data:{labels:d.daily.map(x=>x.day),datasets:[{label:'Approved',data:d.daily.map(x=>x.approved),backgroundColor:'rgba(16,185,129,0.7)'},{label:'Rejected',data:d.daily.map(x=>x.rejected),backgroundColor:'rgba(239,68,68,0.7)'}]},
+      options:{responsive:true,plugins:{legend:{labels:{color:'#888'}}},scales:{x:{stacked:true,ticks:{color:'#555'}},y:{stacked:true,ticks:{color:'#555'}}}}});
+
+    if(charts.akb) charts.akb.destroy();
+    charts.akb=new Chart(document.getElementById('chartAkb'),{type:'doughnut',
+      data:{labels:d.akb_distribution.map(x=>x.grade),datasets:[{data:d.akb_distribution.map(x=>x.count),backgroundColor:['#ef4444','#f59e0b','#3b82f6','#8b5cf6','#10b981'],borderWidth:0}]},
+      options:{responsive:true,plugins:{legend:{position:'bottom',labels:{color:'#888',padding:12}}}}});
+
+    if(charts.reasons) charts.reasons.destroy();
+    charts.reasons=new Chart(document.getElementById('chartReasons'),{type:'bar',
+      data:{labels:d.rejection_reasons.map(x=>x.reason),datasets:[{data:d.rejection_reasons.map(x=>x.count),backgroundColor:'rgba(239,68,68,0.7)',borderRadius:4}]},
+      options:{responsive:true,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#555'}},y:{ticks:{color:'#555'}}}}});
+  } catch(e){ toast('Could not load analytics.'); }
+}
+
+async function loadSubmissions() {
+  try {
+    const res=await fetch(`${API}/admin/submissions`);
+    const d=await res.json();
+    const tb=document.getElementById('adminTbody');
+    if(!d.length){tb.innerHTML='<tr><td colspan="9" style="text-align:center;padding:40px;color:var(--ink-muted)">No submissions yet.</td></tr>';return;}
+    tb.innerHTML=d.map(r=>{
+      const ok=r.decision==='APPROVED';
+      const uid=r.user_id?r.user_id.substring(0,8)+'...':'—';
+      const fraud=r.fraud_flags&&r.fraud_flags.length?`<span class="chip frk">🚨 ${r.fraud_flags.length}</span>`:'—';
+      return `<tr><td><strong>${r.name||'—'} ${r.surname||''}</strong></td><td>${r.date_of_birth||'—'}</td><td>${r.age??'—'}</td><td>${r.akb_score??'—'}</td>
+        <td><span class="chip ${ok?'ok':'no'}">${ok?'✓ Approved':'✕ Rejected'}</span></td>
+        <td><span class="chip ${r.decision_type==='XGBoost ML Model'?'ml':'rul'}">${r.decision_type==='XGBoost ML Model'?'🤖 ML':'📋 Rules'}</span></td>
+        <td>${fraud}</td><td style="font-family:monospace;font-size:11px" title="${r.user_id||''}">${uid}</td>
+        <td>${r.submitted_at?r.submitted_at.substring(0,16):'—'}</td></tr>`;
+    }).join('');
+  } catch(e){ document.getElementById('adminTbody').innerHTML='<tr><td colspan="9" style="text-align:center;padding:40px;color:var(--red)">Could not load.</td></tr>'; }
+}
+
+async function loadHeatmap() {
+  try {
+    const res=await fetch(`${API}/admin/heatmap`);
+    const d=await res.json();
+    if(charts.heatmap) charts.heatmap.destroy();
+    charts.heatmap=new Chart(document.getElementById('chartHeatmap'),{type:'scatter',
+      data:{datasets:[
+        {label:'Approved',data:d.filter(x=>x.decision==='APPROVED').map(x=>({x:x.akb_score,y:x.age,n:x.name})),backgroundColor:'rgba(16,185,129,0.6)',pointRadius:6},
+        {label:'Rejected',data:d.filter(x=>x.decision!=='APPROVED').map(x=>({x:x.akb_score,y:x.age,n:x.name})),backgroundColor:'rgba(239,68,68,0.6)',pointRadius:6}
+      ]},
+      options:{responsive:true,plugins:{legend:{labels:{color:'#888'}},tooltip:{callbacks:{label:c=>`${c.raw.n||'Customer'} | AKB:${c.raw.x} Age:${c.raw.y}`}}},
+        scales:{x:{title:{display:true,text:'AKB Score',color:'#555'},ticks:{color:'#555'}},y:{title:{display:true,text:'Age',color:'#555'},ticks:{color:'#555'}}}}});
+  } catch(e){ toast('Could not load heatmap.'); }
+}
+</script>
+</body>
+</html>
