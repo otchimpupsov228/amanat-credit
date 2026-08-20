@@ -459,47 +459,49 @@ def submit_customer(customer: CustomerInput):
                     "akb_letter_grade": customer.akb_letter_grade,
                 }
 
-            # Step 2 — run XGBoost with financial inputs
+            # Step 2 — score new customer based on financial inputs
             if hard_decision != "PASSED":
                 final_decision = hard_decision
                 decision_type = "Hard Rules"
                 ml_score = None
             else:
-                import numpy as np
                 income = customer.monthly_income or 0
                 expenses = customer.monthly_expenses or 0
                 debt = customer.outstanding_debt or 0
                 overdue = customer.overdue_amount or 0
+                akb = customer.akb_score or 0
 
-                manual_features = {feat: -999 for feat in model_data["features"]}
-                manual_features.update({
-                    "age": age,
-                    "akb_score": customer.akb_score or -999,
-                    "monthly_income": income,
-                    "monthly_expenses": expenses,
-                    "net_income": income - expenses,
-                    "income_total": income,
-                    "total_outstanding_debt": debt,
-                    "debt_to_income": debt / max(income, 1),
-                    "total_overdue_interest": overdue,
-                    "overdue_interest_to_debt": overdue / max(debt, 1) if debt > 0 else 0,
-                    "has_overdue_history": 1 if customer.has_overdue else 0,
-                    "has_akb_score": 1 if customer.akb_score else 0,
-                    "payment_success_rate": 0 if customer.has_overdue else 1,
-                    "successful_payments": 0,
-                    "failed_payments": 0,
-                    "total_payments": 0,
-                    "loans_paid_count": 0,
-                    "total_loans": 0,
-                    "is_pep": 0,
-                    "is_beneficial_owner": 0,
-                    "is_related_to_pep": 0,
-                })
+                score = 50.0
 
-                X = np.array([[manual_features.get(f, -999) for f in model_data["features"]]])
-                prob = model_data["model"].predict_proba(X)[0][1]
-                ml_score = round(float(prob) * 100, 1)
-                final_decision = "APPROVED" if prob >= 0.5 else "REJECTED — High credit risk"
+                if akb >= 750:   score += 30
+                elif akb >= 600: score += 20
+                elif akb >= 400: score += 10
+                elif akb >= 300: score += 5
+
+                net_income = income - expenses
+                if net_income > 2000:   score += 20
+                elif net_income > 1000: score += 14
+                elif net_income > 500:  score += 8
+                elif net_income > 0:    score += 3
+                else:                   score -= 10
+
+                if income > 0:
+                    dti = debt / income
+                    if dti == 0:       score += 10
+                    elif dti < 0.3:    score += 5
+                    elif dti < 0.5:    score += 0
+                    elif dti < 1.0:    score -= 10
+                    else:              score -= 20
+
+                if customer.has_overdue:
+                    score -= 25
+                    if overdue > 1000: score -= 10
+
+                if age and 25 <= age <= 45: score += 5
+                elif age and age > 55:       score -= 5
+
+                ml_score = round(max(5.0, min(95.0, score)), 1)
+                final_decision = "APPROVED" if ml_score >= 50 else "REJECTED — High credit risk"
                 decision_type = "XGBoost ML Model"
 
             fraud_flags = check_fraud(customer.name, customer.surname, customer.date_of_birth, customer.akb_score)

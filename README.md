@@ -156,6 +156,34 @@ Full docs: `http://localhost:8003/docs`
 | 📈 AKB Credit | akb_score, akb_check_count | **0.8%** |
 | Everything else | — | **2.8%** |
 
+### Model Performance
+
+Evaluated on the held-out test set (20%, `random_state=42`, n = 1,732):
+
+| Metric | Score |
+|--------|-------|
+| Accuracy | **0.9994** |
+| Precision | **0.9992** |
+| Recall | **1.0000** |
+| F1-score | **0.9996** |
+| ROC-AUC | **1.0000** |
+
+Confusion matrix: `TN=452 · FP=1 · FN=0 · TP=1279`
+
+> ⚠️ **Note — target leakage.** These near-perfect scores are inflated. The target
+> (good borrower) is derived from `loans_paid`, `loans_overdue`, `loans_written_off`
+> and `failed_payments_30plus`, and those same columns are also used as input
+> features — so the model largely reads the label off its own inputs. To get a
+> realistic estimate, drop the leaking features (`loans_paid_count`, `loans_overdue`,
+> `loans_written_off`, `failed_payments_30plus`, `failed_payment_30plus_rate`,
+> `has_written_off`, `has_overdue_history`) and retrain.
+
+Reproduce the metrics:
+
+```bash
+python3 evaluate_model.py
+```
+
 ### Retrain the model
 
 ```bash
