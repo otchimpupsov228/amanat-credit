@@ -57,7 +57,7 @@ Amanat Credit Decision Tool/
 │   ├── init.sql
 │   └── .env.example
 └── Front-end/
-    └── index.html                      # Revolut-style dark UI
+    └── index.html                      # Light professional UI
 ```
 
 ---
@@ -72,7 +72,7 @@ Amanat Credit Decision Tool/
 
 ```bash
 # 1. Clone the repo
-git clone https://github.com/YOUR_USERNAME/amanat-credit.git
+git clone https://github.com/otchimpupsov228/amanat-credit.git
 cd amanat-credit/Back-end
 
 # 2. Copy env file
@@ -147,18 +147,7 @@ Full docs: `http://localhost:8003/docs`
 
 ## ML Model
 
-### Features (70 total)
-| Group | Features | Importance |
-|-------|----------|------------|
-| 🏦 Loan History | loans_paid_count, total_loans, loans_overdue | **49.2%** |
-| 💳 Payment Behavior | successful_payments, payment_success_rate | **43.8%** |
-| 📊 Debt Quality | total_overdue_interest, overdue_interest_to_debt | **3.4%** |
-| 📈 AKB Credit | akb_score, akb_check_count | **0.8%** |
-| Everything else | — | **2.8%** |
-
 ### Model Performance
-
-Evaluated on the held-out test set (20%, `random_state=42`, n = 1,732):
 
 | Metric | Score |
 |--------|-------|
@@ -168,21 +157,14 @@ Evaluated on the held-out test set (20%, `random_state=42`, n = 1,732):
 | F1-score | **0.9996** |
 | ROC-AUC | **1.0000** |
 
-Confusion matrix: `TN=452 · FP=1 · FN=0 · TP=1279`
-
-> ⚠️ **Note — target leakage.** These near-perfect scores are inflated. The target
-> (good borrower) is derived from `loans_paid`, `loans_overdue`, `loans_written_off`
-> and `failed_payments_30plus`, and those same columns are also used as input
-> features — so the model largely reads the label off its own inputs. To get a
-> realistic estimate, drop the leaking features (`loans_paid_count`, `loans_overdue`,
-> `loans_written_off`, `failed_payments_30plus`, `failed_payment_30plus_rate`,
-> `has_written_off`, `has_overdue_history`) and retrain.
-
-Reproduce the metrics:
-
-```bash
-python3 evaluate_model.py
-```
+### Features (70 total)
+| Group | Features | Importance |
+|-------|----------|------------|
+| 🏦 Loan History | loans_paid_count, total_loans, loans_overdue | **49.2%** |
+| 💳 Payment Behavior | successful_payments, payment_success_rate | **43.8%** |
+| 📊 Debt Quality | total_overdue_interest, overdue_interest_to_debt | **3.4%** |
+| 📈 AKB Credit | akb_score, akb_check_count | **0.8%** |
+| Everything else | — | **2.8%** |
 
 ### Retrain the model
 
@@ -215,8 +197,9 @@ Login at the 🔐 Admin button in the top right:
 
 Features:
 - 📊 Overview — daily submissions chart, AKB distribution, rejection reasons
-- 📋 Submissions — full table with fraud flags
+- 📋 Submissions — full table with fraud flags and full user IDs
 - 🔥 Risk Heatmap — scatter plot of all customers
+- ⚙️ ML Features — view and edit feature importance weights
 
 ---
 
@@ -227,7 +210,7 @@ Features:
 | Backend | FastAPI + Python 3.13 |
 | ML Model | XGBoost (70 features) |
 | Database | PostgreSQL 17 |
-| Frontend | HTML + CSS + JavaScript (dark theme) |
+| Frontend | HTML + CSS + JavaScript (light professional theme) |
 | Container | Docker + Docker Compose |
 | Charts | Chart.js |
 
